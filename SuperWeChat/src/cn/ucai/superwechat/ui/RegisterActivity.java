@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +44,6 @@ import cn.ucai.superwechat.utils.ResultUtils;
 
 /**
  * register screen
- *
  */
 public class RegisterActivity extends BaseActivity {
     private static final String TAG = RegisterActivity.class.getSimpleName();
@@ -59,8 +59,10 @@ public class RegisterActivity extends BaseActivity {
     EditText mEtConfirmPassword;
 
     ProgressDialog pd;
-    String username,nickname,password;
+    String username, nickname, password;
     IUserModel model;
+    @BindView(R.id.img_back)
+    ImageView mImgBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,9 +76,10 @@ public class RegisterActivity extends BaseActivity {
     private void initView() {
         mTxtTitle.setVisibility(View.VISIBLE);
         mTxtTitle.setText(R.string.register);
+        mImgBack.setVisibility(View.VISIBLE);
     }
 
-    private void showDialog(){
+    private void showDialog() {
         pd = new ProgressDialog(this);
         pd.setMessage(getResources().getString(R.string.Is_the_registered));
         pd.show();
@@ -110,7 +113,7 @@ public class RegisterActivity extends BaseActivity {
         return true;
     }
 
-    private void registerEMServer(){
+    private void registerEMServer() {
         new Thread(new Runnable() {
             public void run() {
                 try {
@@ -123,7 +126,7 @@ public class RegisterActivity extends BaseActivity {
                             // save current user
                             SuperWeChatHelper.getInstance().setCurrentUserName(username);
                             Toast.makeText(getApplicationContext(), getResources().getString(R.string.Registered_successfully), Toast.LENGTH_SHORT).show();
-                            finish();
+                            MFGT.gotoLogin(RegisterActivity.this);
                         }
                     });
                 } catch (final HyphenateException e) {
@@ -156,7 +159,7 @@ public class RegisterActivity extends BaseActivity {
                 new OnCompleteListener<String>() {
                     @Override
                     public void onSuccess(String result) {
-                        L.e(TAG,"result="+result);
+                        L.e(TAG, "result=" + result);
                     }
 
                     @Override
@@ -183,36 +186,36 @@ public class RegisterActivity extends BaseActivity {
     }
 
     private void registerAppServer() {
-        if (checkInput()){
+        if (checkInput()) {
             showDialog();
-            L.e(TAG,"password="+MD5.getMessageDigest(password));
+            L.e(TAG, "password=" + MD5.getMessageDigest(password));
             model.register(RegisterActivity.this, username, nickname, MD5.getMessageDigest(password),
                     new OnCompleteListener<String>() {
                         @Override
                         public void onSuccess(String s) {
-                            L.e(TAG,"s="+s);
+                            L.e(TAG, "s=" + s);
                             boolean success = false;
-                            if (s!=null){
+                            if (s != null) {
                                 Result result = ResultUtils.getResultFromJson(s, String.class);
-                                if (result!=null){
-                                    if (result.isRetMsg()){
+                                if (result != null) {
+                                    if (result.isRetMsg()) {
                                         success = true;
                                         registerEMServer();
-                                    }else if (result.getRetCode() == I.MSG_REGISTER_USERNAME_EXISTS){
+                                    } else if (result.getRetCode() == I.MSG_REGISTER_USERNAME_EXISTS) {
                                         CommonUtils.showShortToast(R.string.User_already_exists);
-                                    }else{
+                                    } else {
                                         CommonUtils.showShortToast(R.string.Registration_failed);
                                     }
                                 }
                             }
-                            if (!success){
+                            if (!success) {
                                 pd.dismiss();
                             }
                         }
 
                         @Override
                         public void onError(String error) {
-                            L.e(TAG,"error="+error);
+                            L.e(TAG, "error=" + error);
                             pd.dismiss();
                             CommonUtils.showShortToast(R.string.Registration_failed);
                         }
