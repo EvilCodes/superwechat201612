@@ -42,6 +42,8 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        if(savedInstanceState != null && savedInstanceState.getBoolean("isConflict", false))
+            return;
         initData();
     }
 
