@@ -63,7 +63,6 @@ import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.runtimepermissions.PermissionsManager;
 import cn.ucai.superwechat.runtimepermissions.PermissionsResultAction;
-import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.widget.DMTabHost;
 import cn.ucai.superwechat.widget.MFViewPager;
 
@@ -345,22 +344,20 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        L.e("main","onPageScrolled,position="+position+",positionOffset="+positionOffset+",positionOffsetPixels="+positionOffsetPixels);
     }
 
     @Override
     public void onPageSelected(int position) {
-        L.e("main","onPageSelected,position="+position);
+        mLayoutTabhost.setChecked(position);
     }
 
     @Override
     public void onPageScrollStateChanged(int state) {
-        L.e("main","onPageScrollStateChanged,state="+state);
     }
 
     @Override
     public void onCheckedChange(int checkedPosition, boolean byUser) {
-        L.e("main","onCheckedChange,checkedPosition="+checkedPosition+",byUser="+byUser);
+        mLayoutViewpage.setCurrentItem(checkedPosition,false);
     }
 
     public class MyContactListener implements EMContactListener {
