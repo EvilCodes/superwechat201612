@@ -18,6 +18,7 @@ import cn.ucai.superwechat.SuperWeChatHelper.DataSyncListener;
 import cn.ucai.superwechat.db.IUserModel;
 import cn.ucai.superwechat.db.OnCompleteListener;
 import cn.ucai.superwechat.db.UserModel;
+import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.PreferenceManager;
 import cn.ucai.superwechat.utils.Result;
 import cn.ucai.superwechat.utils.ResultUtils;
@@ -141,6 +142,7 @@ public class UserProfileManager {
 	}
 
 	public synchronized User getCurrentAppUserInfo(){
+		L.e(TAG,"getCurrentAppUserInfo,currentAppUser="+currentAppUser);
 		if (currentAppUser == null || currentAppUser.getMUserName()==null){
 			String username = EMClient.getInstance().getCurrentUser();
 			currentAppUser = new User(username);
@@ -225,6 +227,7 @@ public class UserProfileManager {
 								User user = (User) result.getRetData();
 //								L.e(TAG,"asyncGetCurrentAppUserInfo,user="+user);
 								if (user!=null){
+									currentAppUser = user;
 									setCurrentAppUserNick(user.getMUserNick());
 									setCurrentAppUserAvatar(user.getAvatar());
 									SuperWeChatHelper.getInstance().saveAppContact(user);
@@ -277,6 +280,7 @@ public class UserProfileManager {
 	}
 
 	private void setCurrentAppUserAvatar(String avatar){
+		L.e(TAG,"setCurrentAppUserAvatar,avatar="+avatar);
 		getCurrentAppUserInfo().setAvatar(avatar);
 		PreferenceManager.getInstance().setCurrentUserAvatar(avatar);
 	}
