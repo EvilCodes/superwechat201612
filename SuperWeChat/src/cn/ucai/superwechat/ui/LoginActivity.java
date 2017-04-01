@@ -246,6 +246,9 @@ public class LoginActivity extends BaseActivity {
             case R.id.btn_register:
                 register();
                 break;
+            case R.id.img_back:
+                finish();
+                break;
         }
     }
 }
