@@ -79,4 +79,10 @@ public class ProfileFragment extends Fragment {
     public void gotoUserInfo(){
         MFGT.gotoUserInfo(getActivity());
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        initData();
+    }
 }
