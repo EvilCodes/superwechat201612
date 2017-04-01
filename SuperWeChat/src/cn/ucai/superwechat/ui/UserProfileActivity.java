@@ -12,6 +12,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
@@ -28,7 +29,10 @@ import com.hyphenate.easeui.domain.User;
 import com.hyphenate.easeui.utils.EaseUserUtils;
 import com.hyphenate.easeui.widget.EaseTitleBar;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,8 +40,10 @@ import butterknife.OnClick;
 import cn.ucai.superwechat.I;
 import cn.ucai.superwechat.R;
 import cn.ucai.superwechat.SuperWeChatHelper;
+import cn.ucai.superwechat.utils.L;
 
 public class UserProfileActivity extends BaseActivity {
+    private static final String TAG = UserProfileActivity.class.getSimpleName();
 
     private static final int REQUESTCODE_PICK = 1;
     private static final int REQUESTCODE_CUTTING = 2;
@@ -53,6 +59,8 @@ public class UserProfileActivity extends BaseActivity {
     User user = null;
 
     UpdateNickReceiver mReceiver;
+    UpdateAvatarReceiver mUpdateAvatarReceiver;
+    String avatarName;
 
     @Override
     protected void onCreate(Bundle arg0) {
@@ -68,6 +76,9 @@ public class UserProfileActivity extends BaseActivity {
         mReceiver = new UpdateNickReceiver();
         IntentFilter filter = new IntentFilter(I.REQUEST_UPDATE_USER_NICK);
         registerReceiver(mReceiver,filter);
+        mUpdateAvatarReceiver = new UpdateAvatarReceiver();
+        IntentFilter intentFilter = new IntentFilter(I.REQUEST_UPDATE_AVATAR);
+        registerReceiver(mUpdateAvatarReceiver,intentFilter);
     }
 
     private void initData() {
@@ -232,49 +243,64 @@ public class UserProfileActivity extends BaseActivity {
      * @param picdata
      */
     private void setPicToView(Intent picdata) {
+        L.e(TAG,"setPicToView,picdata="+picdata);
         Bundle extras = picdata.getExtras();
+        L.e(TAG,"setPicToView,extras="+extras);
         if (extras != null) {
             Bitmap photo = extras.getParcelable("data");
+            L.e(TAG,"setPicToView,photo="+photo);
             Drawable drawable = new BitmapDrawable(getResources(), photo);
+            L.e(TAG,"setPicToView,drawable="+drawable);
             mIvUserinfoAvatar.setImageDrawable(drawable);
-            uploadUserAvatar(Bitmap2Bytes(photo));
+            uploadAppUserAvatar(saveBitmapFile(photo));
         }
 
     }
 
-    private void uploadUserAvatar(final byte[] data) {
+    private void uploadAppUserAvatar(File file) {
         dialog = ProgressDialog.show(this, getString(R.string.dl_update_photo), getString(R.string.dl_waiting));
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                final String avatarUrl = SuperWeChatHelper.getInstance().getUserProfileManager().uploadUserAvatar(data);
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialog.dismiss();
-                        if (avatarUrl != null) {
-                            Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_success),
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_fail),
-                                    Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-
-            }
-        }).start();
-
+        SuperWeChatHelper.getInstance().getUserProfileManager().uploadUserAvatar(file);
         dialog.show();
     }
 
+    private String getAvatarName() {
+        avatarName = user.getMUserName()+ System.currentTimeMillis();
+        L.e(TAG,"avatarname="+avatarName);
+        return avatarName;
+    }
 
-    public byte[] Bitmap2Bytes(Bitmap bm) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bm.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        return baos.toByteArray();
+    /**
+     * 返回头像保存在sd卡的位置:
+     * Android/data/cn.ucai.superwechat/files/pictures/user_avatar
+     * @param context
+     * @param path
+     * @return
+     */
+    public static String getAvatarPath(Context context, String path){
+        File dir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File folder = new File(dir,path);
+        if(!folder.exists()){
+            folder.mkdir();
+        }
+        return folder.getAbsolutePath();
+    }
+
+    private File saveBitmapFile(Bitmap bitmap) {
+        if (bitmap != null) {
+            String imagePath = getAvatarPath(UserProfileActivity.this,I.AVATAR_TYPE)+"/"+getAvatarName()+".jpg";
+            File file = new File(imagePath);//将要保存图片的路径
+            L.e("file path="+file.getAbsolutePath());
+            try {
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+                bos.flush();
+                bos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return file;
+        }
+        return null;
     }
 
     class UpdateNickReceiver extends BroadcastReceiver{
@@ -286,11 +312,37 @@ public class UserProfileActivity extends BaseActivity {
         }
     }
 
+    class UpdateAvatarReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean success = intent.getBooleanExtra(I.Avatar.UPDATE_TIME,false);
+            updateAvatarView(success);
+        }
+    }
+
+    private void updateAvatarView(boolean success) {
+        dialog.dismiss();
+        if (success) {
+            Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_success),
+                    Toast.LENGTH_SHORT).show();
+            user = SuperWeChatHelper.getInstance().getUserProfileManager().getCurrentAppUserInfo();
+            L.e(TAG,"updateAvatarView,user="+user);
+            EaseUserUtils.setAppUserAvatar(UserProfileActivity.this,user.getMUserName(),mIvUserinfoAvatar);
+        } else {
+            Toast.makeText(UserProfileActivity.this, getString(R.string.toast_updatephoto_fail),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (mReceiver!=null){
             unregisterReceiver(mReceiver);
+        }
+        if (mUpdateAvatarReceiver!=null){
+            unregisterReceiver(mUpdateAvatarReceiver);
         }
     }
 }
