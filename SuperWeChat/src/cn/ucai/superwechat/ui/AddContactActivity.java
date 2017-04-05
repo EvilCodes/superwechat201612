@@ -46,6 +46,7 @@ public class AddContactActivity extends BaseActivity {
     private String toAddUsername;
     private ProgressDialog progressDialog;
     IUserModel model;
+    User user = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +80,14 @@ public class AddContactActivity extends BaseActivity {
             new EaseAlertDialog(this, R.string.Please_enter_a_username).show();
             return;
         }
-
+        showDiglog();
         searchUser();
+    }
+
+    private void showDiglog() {
+        progressDialog = new ProgressDialog(AddContactActivity.this);
+        progressDialog.setMessage(getString(R.string.addcontact_search));
+        progressDialog.show();
     }
 
     private void searchUser() {
@@ -93,6 +100,7 @@ public class AddContactActivity extends BaseActivity {
                         if (s != null) {
                             Result result = ResultUtils.getResultFromJson(s, User.class);
                             if (result != null && result.isRetMsg()) {
+                                user = (User) result.getRetData();
                                 success = true;
                                 //跳转到用户详情
                             }
@@ -109,9 +117,11 @@ public class AddContactActivity extends BaseActivity {
     }
 
     private void showResult(boolean success) {
+        progressDialog.dismiss();
         mLlUserResult.setVisibility(success?View.GONE:View.VISIBLE);
         if (success){
             //跳转用户详情
+            MFGT.gotoFriend(AddContactActivity.this,user);
         }
     }
 
