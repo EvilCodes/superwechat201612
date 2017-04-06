@@ -468,16 +468,17 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
      * update the total unread count
      */
     public void updateUnreadAddressLable() {
-//        runOnUiThread(new Runnable() {
-//            public void run() {
-//                int count = getUnreadAddressCountTotal();
+        runOnUiThread(new Runnable() {
+            public void run() {
+                int count = getUnreadAddressCountTotal();
+                mLayoutTabhost.setHasNew(1,count>0);
 //                if (count > 0) {
 //                    unreadAddressLable.setVisibility(View.VISIBLE);
 //                } else {
 //                    unreadAddressLable.setVisibility(View.INVISIBLE);
 //                }
-//            }
-//        });
+            }
+        });
 
     }
 
