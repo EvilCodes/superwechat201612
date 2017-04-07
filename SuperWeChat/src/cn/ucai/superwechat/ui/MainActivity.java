@@ -65,7 +65,6 @@ import cn.ucai.superwechat.db.InviteMessgeDao;
 import cn.ucai.superwechat.db.UserDao;
 import cn.ucai.superwechat.runtimepermissions.PermissionsManager;
 import cn.ucai.superwechat.runtimepermissions.PermissionsResultAction;
-import cn.ucai.superwechat.utils.L;
 import cn.ucai.superwechat.utils.MFGT;
 import cn.ucai.superwechat.widget.DMTabHost;
 import cn.ucai.superwechat.widget.MFViewPager;
@@ -460,6 +459,7 @@ public class MainActivity extends BaseActivity implements ViewPager.OnPageChange
      */
     public void updateUnreadLabel() {
         int count = getUnreadMsgCountTotal();
+        mLayoutTabhost.setUnreadCount(0,count);
 //        if (count > 0) {
 //            unreadLabel.setText(String.valueOf(count));
 //            unreadLabel.setVisibility(View.VISIBLE);
