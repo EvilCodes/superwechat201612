@@ -15,7 +15,6 @@ package cn.ucai.superwechat.ui;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -182,7 +181,7 @@ public class ContactListFragment extends EaseContactListFragment {
                 break;
             case R.id.group_item:
                 // 进入群聊列表页面
-                startActivity(new Intent(getActivity(), GroupsActivity.class));
+                MFGT.gotoGroups(getActivity());
                 break;
 //            case R.id.chat_room_item:
 //                //进入聊天室列表页面

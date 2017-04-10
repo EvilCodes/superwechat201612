@@ -28,9 +28,12 @@ import android.widget.Toast;
 import com.hyphenate.chat.EMClient;
 import com.hyphenate.chat.EMGroupManager.EMGroupOptions;
 import com.hyphenate.chat.EMGroupManager.EMGroupStyle;
-import cn.ucai.superwechat.R;
 import com.hyphenate.easeui.widget.EaseAlertDialog;
+import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.hyphenate.exceptions.HyphenateException;
+
+import cn.ucai.superwechat.R;
+import cn.ucai.superwechat.utils.MFGT;
 
 public class NewGroupActivity extends BaseActivity {
 	private EditText groupNameEditText;
@@ -39,6 +42,7 @@ public class NewGroupActivity extends BaseActivity {
 	private CheckBox publibCheckBox;
 	private CheckBox memberCheckbox;
 	private TextView secondTextView;
+	EaseTitleBar titleBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,8 @@ public class NewGroupActivity extends BaseActivity {
 		publibCheckBox = (CheckBox) findViewById(R.id.cb_public);
 		memberCheckbox = (CheckBox) findViewById(R.id.cb_member_inviter);
 		secondTextView = (TextView) findViewById(R.id.second_desc);
+		titleBar = (EaseTitleBar) findViewById(R.id.title_bar);
+		initBack();
 		
 		publibCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -129,7 +135,12 @@ public class NewGroupActivity extends BaseActivity {
 		}
 	}
 
-	public void back(View view) {
-		finish();
+	public void initBack() {
+		titleBar.setLeftLayoutClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				MFGT.finish(NewGroupActivity.this);
+			}
+		});
 	}
 }
