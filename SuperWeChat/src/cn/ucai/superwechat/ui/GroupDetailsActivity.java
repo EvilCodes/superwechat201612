@@ -44,6 +44,7 @@ import com.hyphenate.easeui.widget.EaseAlertDialog;
 import com.hyphenate.easeui.widget.EaseAlertDialog.AlertDialogUser;
 import com.hyphenate.easeui.widget.EaseExpandGridView;
 import com.hyphenate.easeui.widget.EaseSwitchButton;
+import com.hyphenate.easeui.widget.EaseTitleBar;
 import com.hyphenate.exceptions.HyphenateException;
 import com.hyphenate.util.EMLog;
 
@@ -88,6 +89,7 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 	private List<String> blackList = Collections.synchronizedList(new ArrayList<String>());
 
 	GroupChangeListener groupChangeListener;
+	EaseTitleBar titleBar;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +106,8 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
         
 		setContentView(R.layout.em_activity_group_details);
 
+		titleBar = (EaseTitleBar) findViewById(R.id.title_bar);
+		initBack();
 		instance = this;
 		st = getResources().getString(R.string.people);
 		RelativeLayout clearAllHistory = (RelativeLayout) findViewById(R.id.clear_all_history);
@@ -142,8 +146,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 		groupChangeListener = new GroupChangeListener();
 		EMClient.getInstance().groupManager().addGroupChangeListener(groupChangeListener);
-		
-		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount() + st);
+
+		titleBar.setTitle(group.getGroupName() + "(" + group.getMemberCount() + st);
+//		((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount() + st);
 
 		membersAdapter = new GridAdapter(this, R.layout.em_grid_owner, new ArrayList<String>());
 		EaseExpandGridView userGridview = (EaseExpandGridView) findViewById(R.id.gridview);
@@ -283,7 +288,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 								EMClient.getInstance().groupManager().changeGroupName(groupId, returnData);
 								runOnUiThread(new Runnable() {
 									public void run() {
-										((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount() + ")");
+
+										titleBar.setTitle(group.getGroupName() + "(" + group.getMemberCount() + ")");
+//										((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount() + ")");
 										progressDialog.dismiss();
 										Toast.makeText(getApplicationContext(), st6, Toast.LENGTH_SHORT).show();
 									}
@@ -505,8 +512,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 					refreshMembersAdapter();
 					runOnUiThread(new Runnable() {
 						public void run() {
-							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount()
-									+ st);
+							titleBar.setTitle(group.getGroupName() + "(" + group.getMemberCount()+ st);
+//							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount()
+//									+ st);
 							progressDialog.dismiss();
 						}
 					});
@@ -1047,8 +1055,9 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 							refreshMembersAdapter();
 
 //							refreshUIVisibility();
-							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount()
-									+ ")");
+							titleBar.setTitle(group.getGroupName() + "(" + group.getMemberCount()+ ")");
+//							((TextView) findViewById(R.id.group_name)).setText(group.getGroupName() + "(" + group.getMemberCount()
+//									+ ")");
 							loadingPB.setVisibility(View.INVISIBLE);
 
 							if (EMClient.getInstance().getCurrentUser().equals(group.getOwner())) {
@@ -1097,9 +1106,14 @@ public class GroupDetailsActivity extends BaseActivity implements OnClickListene
 
 	}
 
-	public void back(View view) {
-		setResult(RESULT_OK);
-		finish();
+	public void initBack() {
+		titleBar.setLeftLayoutClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				setResult(RESULT_OK);
+				finish();
+			}
+		});
 	}
 
 	@Override
